@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+import time
 
 # Path to the DNS zone files
 ZONE_PATH_TEMPLATE = "/etc/bind/zones/{domain}.zone"
@@ -38,6 +39,7 @@ class ZoneFileManager(object):
         try:
             with open(self.zonefile, 'w') as fh:
                 fh.writelines(self.lines)
+                time.sleep(10) # wait for propagation for next record
         except IOError:
             print(f"ERROR: Could not write to zone file {self.zonefile}")
             sys.exit(1)
