@@ -85,7 +85,7 @@ class ZoneFileManager(object):
 
     def reload_bind(self):
         """Reloads the BIND container to apply changes"""
-        ret = os.system("docker exec openpanel_dns rndc reload")
+        ret = os.system(f"docker exec openpanel_dns rndc reload {validation_domain}")
         if ret != 0:
             print("ERROR: Failed to reload BIND server.")
             sys.exit(1)
