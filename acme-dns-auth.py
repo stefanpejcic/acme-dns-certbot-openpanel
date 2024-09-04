@@ -6,7 +6,7 @@ import sys
 # Path to the DNS zone files
 ZONE_PATH_TEMPLATE = "/etc/bind/zones/{domain}.zone"
 # Force re-registration. Overwrites the already existing DNS records.
-FORCE_REGISTER = True
+FORCE_REGISTER = False
 
 DOMAIN = os.environ["CERTBOT_DOMAIN"]
 if DOMAIN.startswith("*."):
@@ -44,21 +44,31 @@ class ZoneFileManager(object):
 
     def update_txt_record(self, validation_domain, validation_token):
         """Updates or adds the TXT record in the zone file"""
-        # Remove any existing TXT record for this validation domain
-        self.lines = [line for line in self.lines if not line.startswith(validation_domain + " ")]
-
-        # Add the new TXT record
-        new_record = f'{validation_domain}. IN TXT "{validation_token}"\n'
-        self.lines.append(new_record)
-
+        record_found = False
+        updated_lines = []
+    
+        for line in self.lines:
+            # Check if the line starts with the validation domain
+            if line.startswith(f"{validation_domain}."):
+                # Update the existing TXT record
+                updated_lines.append(f"{validation_domain}. IN TXT \"{validation_token}\"\n")
+                record_found = True
+            else:
+                # Keep the existing line if it doesn't match the validation domain
+                updated_lines.append(line)
+        
+        if not record_found:
+            # If no record was found, append the new TXT record
+            updated_lines.append(f"{validation_domain}. IN TXT \"{validation_token}\"\n")
+        
+        # Replace the old lines with the updated lines
+        self.lines = updated_lines
+    
         # Increment the zone serial number
         self.increment_serial()
-
+    
         # Save the updated zone file
         self.save_zone_file()
-
-        # Reload the BIND server to apply changes
-        #self.reload_bind() # inotify instead
 
     def increment_serial(self):
         """Increments the serial number in the zone file"""
@@ -81,14 +91,6 @@ class ZoneFileManager(object):
 
         # Replace the old serial with the new one, preserving the comment
         self.lines[serial_idx] = f"                        {new_serial}      ; Serial number\n"
-
-
-    def reload_bind(self):
-        """Reloads the BIND container to apply changes"""
-        ret = os.system(f"docker exec openpanel_dns rndc reload {DOMAIN}")
-        if ret != 0:
-            print("ERROR: Failed to reload BIND server.")
-            sys.exit(1)
 
 
 if __name__ == "__main__":
