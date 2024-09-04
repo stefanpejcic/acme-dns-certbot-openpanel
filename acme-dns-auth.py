@@ -51,7 +51,7 @@ class ZoneFileManager(object):
             # Check if the line starts with the validation domain
             if line.startswith(f"{validation_domain}."):
                 # Update the existing TXT record
-                updated_lines.append(f"{validation_domain}.       3600       IN       TXT       \"{validation_token}\"\n")
+                updated_lines.append(f"{validation_domain}.       300       IN       TXT       \"{validation_token}\"\n")
                 record_found = True
             else:
                 # Keep the existing line if it doesn't match the validation domain
@@ -59,7 +59,7 @@ class ZoneFileManager(object):
         
         if not record_found:
             # If no record was found, append the new TXT record
-            updated_lines.append(f"{validation_domain}.       3600       IN       TXT       \"{validation_token}\"\n")
+            updated_lines.append(f"{validation_domain}.       300       IN       TXT       \"{validation_token}\"\n")
         
         # Replace the old lines with the updated lines
         self.lines = updated_lines
