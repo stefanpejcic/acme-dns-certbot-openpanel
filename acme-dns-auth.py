@@ -58,7 +58,7 @@ class ZoneFileManager(object):
         self.save_zone_file()
 
         # Reload the BIND server to apply changes
-        self.reload_bind()
+        #self.reload_bind() # inotify instead
 
     def increment_serial(self):
         """Increments the serial number in the zone file"""
