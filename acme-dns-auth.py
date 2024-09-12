@@ -39,7 +39,7 @@ class ZoneFileManager(object):
         try:
             with open(self.zonefile, 'w') as fh:
                 fh.writelines(self.lines)
-                time.sleep(10) # wait for propagation for next record
+                time.sleep(30) # wait for propagation for next record
         except IOError:
             print(f"ERROR: Could not write to zone file {self.zonefile}")
             sys.exit(1)
